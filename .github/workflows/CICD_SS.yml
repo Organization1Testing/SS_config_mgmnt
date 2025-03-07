@@ -33,23 +33,29 @@ jobs:
           name: build-artifact
           path: target/*.war  # Adjust the path as needed
 
-      - name: Upload Artifact to Nexus Repository
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          NEXUS_REPOSITORY_URL: ${{ secrets.NEXUS_REPOSITORY_URL }}
-        run: |
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifact
+          path: ./artifact  # Specify the folder to download the artifact             
+
+      #- name: Upload Artifact to Nexus Repository
+        #env:
+          #NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          #NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          #NEXUS_REPOSITORY_URL: ${{ secrets.NEXUS_REPOSITORY_URL }}
+        #run: |
           # Set the artifact path (adjust the file name as needed)
-          ARTIFACT=target/my-artifact.war
-          echo "Uploading $ARTIFACT to Nexus Repository..."
-          curl -v -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$ARTIFACT" "$NEXUS_REPOSITORY_URL/my-artifact.war"
+          #ARTIFACT=target/my-artifact.war
+          #echo "Uploading $ARTIFACT to Nexus Repository..."
+          #curl -v -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$ARTIFACT" "$NEXUS_REPOSITORY_URL/my-artifact.war"
 
       - name: Deploy Artifact to Jetty via SaltStack
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           # Construct the artifact URL as stored in Nexus
-          NEXUS_ARTIFACT_URL: ${{ secrets.NEXUS_REPOSITORY_URL }}/my-artifact.war
+          #NEXUS_ARTIFACT_URL: ${{ secrets.NEXUS_REPOSITORY_URL }}/my-artifact.war
         run: |
           echo "Deploying artifact to Jetty on EC2..."
           # SSH into the EC2 instance and run a salt-call command that applies the jetty.deploy state
