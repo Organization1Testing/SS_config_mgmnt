@@ -5,13 +5,11 @@ on:
     branches: [ "main" ]
     paths:
       - ".github/workflows/CICD_SS.yml"
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build_and_deploy:
     name: Build, Upload, and Deploy
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
