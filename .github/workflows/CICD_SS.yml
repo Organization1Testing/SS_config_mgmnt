@@ -70,7 +70,7 @@ jobs:
 
           # SSH into the EC2 instance and run a salt-call command that applies the jetty.deploy state
           # The pillar passes the local artifact path so that the state can deploy it
-          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+          ssh -i  -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
             "sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_path\": \"/tmp/application.war\"}'"
       
         # env:
