@@ -67,15 +67,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
           
-
-      - name: Debug SSH Configuration
-        run: |
-              echo "Private key content:"
-              cat ~/.ssh/id_rsa
-              echo "Known hosts:"
-              cat ~/.ssh/known_hosts
-              echo "Testing SSH connection:"
-              ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -v $EC2_USER@$EC2_HOST echo "SSH connection successful"
+      # - name: Debug SSH Configuration
+      #   run: |
+      #         echo "Private key content:"
+      #         cat ~/.ssh/id_rsa
+      #         echo "Known hosts:"
+      #         cat ~/.ssh/known_hosts
+      #         echo "Testing SSH connection:"
+      #         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -v $EC2_USER@$EC2_HOST echo "SSH connection successful"
 
       - name: Deploy Artifact to Jetty via SaltStack
         env:
