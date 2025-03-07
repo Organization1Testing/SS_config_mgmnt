@@ -7,7 +7,7 @@ on:
       - ".github/workflows/CICD_SS.yml"
 
 jobs:
-  build_and_deploy:
+  build:
     name: Build, Upload, and Deploy
     runs-on: ubuntu-latest
 
@@ -32,6 +32,15 @@ jobs:
         with:
           name: build-artifact
           path: target/*.war  # Adjust the path as needed
+
+  deploy:
+    name: Deploy with Ansible
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v3  
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v3
