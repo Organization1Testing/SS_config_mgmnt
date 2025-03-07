@@ -3,6 +3,8 @@ name: Java CI with Maven, Nexus Upload, and SaltStack Deployment
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - ".github/workflows/CICD_SS.yml"
   pull_request:
     branches: [ "main" ]
 
