@@ -1,4 +1,4 @@
-name: Java CI with Maven, Nexus Upload, and SaltStack Deployment
+name: Java CI with Maven, and SaltStack Deployment
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build, Upload, and Deploy
+    name: Build and Upload
     runs-on: ubuntu-latest
 
     steps:
@@ -34,16 +34,16 @@ jobs:
           path: target/*.war  # Adjust the path as needed
 
   deploy:
-    name: Deploy with Ansible
+    name: Download and deploy
     runs-on: ubuntu-latest
     needs: build
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v3  
+        uses: actions/checkout@v4  
 
       - name: Download Build Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-artifact
           path: ./artifact  # Specify the folder to download the artifact             
@@ -70,4 +70,5 @@ jobs:
           # SSH into the EC2 instance and run a salt-call command that applies the jetty.deploy state
           # The pillar passes the artifact URL so that the state can download and deploy it
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            "sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_url\": \"${NEXUS_ARTIFACT_URL}\"}'"
+            #"sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_url\": \"${NEXUS_ARTIFACT_URL}\"}'"
+            "sudo salt-call --local state.apply jetty.deploy pillar='{"artifact_path": "./target/*.war"}'"
