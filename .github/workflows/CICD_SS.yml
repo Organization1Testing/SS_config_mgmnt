@@ -1,0 +1,58 @@
+name: Java CI with Maven, Nexus Upload, and SaltStack Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_deploy:
+    name: Build, Upload, and Deploy
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          set-safe-directory: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Upload Build Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: target/*.war  # Adjust the path as needed
+
+      - name: Upload Artifact to Nexus Repository
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_REPOSITORY_URL: ${{ secrets.NEXUS_REPOSITORY_URL }}
+        run: |
+          # Set the artifact path (adjust the file name as needed)
+          ARTIFACT=target/my-artifact.war
+          echo "Uploading $ARTIFACT to Nexus Repository..."
+          curl -v -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$ARTIFACT" "$NEXUS_REPOSITORY_URL/my-artifact.war"
+
+      - name: Deploy Artifact to Jetty via SaltStack
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          # Construct the artifact URL as stored in Nexus
+          NEXUS_ARTIFACT_URL: ${{ secrets.NEXUS_REPOSITORY_URL }}/my-artifact.war
+        run: |
+          echo "Deploying artifact to Jetty on EC2..."
+          # SSH into the EC2 instance and run a salt-call command that applies the jetty.deploy state
+          # The pillar passes the artifact URL so that the state can download and deploy it
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+            "sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_url\": \"${NEXUS_ARTIFACT_URL}\"}'"
