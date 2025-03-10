@@ -55,16 +55,28 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan ${{ secrets.VIN_EC2_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Test SSH connection
+        run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VIN_EC2_USER }}@${{ secrets.VIN_EC2_HOST }} echo "SSH connection successful"
+
+      # - name: Deploy Artifact to Jetty via SaltStack
+      #   env:
+      #     EC2_HOST: ${{ secrets.VIN_EC2_HOST }}
+      #     EC2_USER: ${{ secrets.VIN_EC2_USER }}
+      #   run: |
+      #     echo "Deploying artifact to Jetty on EC2..."
+      #     scp -o StrictHostKeyChecking=no ./artifact/*.war $EC2_USER@$EC2_HOST:/tmp/application.war
+      #     ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+      #       "sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_path\": \"/tmp/application.war\"}'"
+      
       - name: Deploy Artifact to Jetty via SaltStack
         env:
           EC2_HOST: ${{ secrets.VIN_EC2_HOST }}
           EC2_USER: ${{ secrets.VIN_EC2_USER }}
         run: |
           echo "Deploying artifact to Jetty on EC2..."
-          scp -o StrictHostKeyChecking=no ./artifact/*.war $EC2_USER@$EC2_HOST:/tmp/application.war
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
-            "sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_path\": \"/tmp/application.war\"}'"
-
+          scp -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./artifact/*.war $EC2_USER@$EC2_HOST:/tmp/application.war
+          ssh -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
+          "sudo salt-call --local state.apply jetty.deploy pillar='{\"artifact_path\": \"/tmp/application.war\"}'"
       #- name: Upload Artifact to Nexus Repository
         #env:
           #NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
