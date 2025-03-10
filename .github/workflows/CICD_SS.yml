@@ -1,4 +1,4 @@
-name: Java CI with Maven, and SaltStack Deployment
+name: Java CI with Maven and SaltStack Deployment
 
 on:
   push:
