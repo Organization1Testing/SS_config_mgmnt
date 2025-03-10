@@ -10,13 +10,12 @@ jobs:
   build:
     name: Build and Upload
     runs-on: ubuntu-latest
-
-steps:
-      - name: Check previous workflow run status
-        id: check-run
-        uses: actions/github-script@v4
-        with:
-          script: |
+    steps:
+     - name: Check previous workflow run status
+       id: check-run
+       uses: actions/github-script@v4
+       with:
+         script: |
             const { data: runs } = await github.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -29,29 +28,29 @@ steps:
             } else {
               core.setOutput('skip', 'false');
             }
-
-      - name: Exit if previous build was successful
-        if: steps.check-run.outputs.skip == 'true'
-        run: echo "Previous build was successful, skipping..." && exit 0
+            
+     - name: Exit if previous build was successful
+       if: steps.check-run.outputs.skip == 'true'
+       run: echo "Previous build was successful, skipping..." && exit 0
         
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
+     - name: Checkout Repository
+       uses: actions/checkout@v4
+       with:
           set-safe-directory: false
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
+          
+     - name: Set up JDK 17
+       uses: actions/setup-java@v3
+       with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+     - name: Build with Maven
+       run: mvn -B package --file pom.xml
 
-      - name: Upload Build Artifact to GitHub
-        uses: actions/upload-artifact@v4
-        with:
+     - name: Upload Build Artifact to GitHub
+       uses: actions/upload-artifact@v4
+       with:
           name: build-artifact
           path: target/*.war  # Adjust the path as needed
 
